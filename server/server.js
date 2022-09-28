@@ -25,8 +25,10 @@ const upload = multer({ memoStorage });
 //add a picture
 app.post("/addPicture", upload.single("pic"), async (req, res) => {
   const file = req.file;
-  console.log("Below is the file");
+  console.log("Below is the file inside addPicture");
   console.log(file);
+  console.log("The file name is: " + file.originalname);
+  console.log("The file type is: " + file.mimetype);
   const imageRef = ref(storage, file.originalname);
   const metatype = { contentType: file.mimetype, name: file.originalname };
   await uploadBytes(imageRef, file.buffer, metatype)
@@ -34,6 +36,41 @@ app.post("/addPicture", upload.single("pic"), async (req, res) => {
       res.send("uploaded!");
     })
     .catch((error) => console.log(error.message));
+});
+
+app.post("/imgixAddPicture", upload.single("pic"), async (req, res) => {
+  const file = req.file;
+  console.log("Below is the file inside imgixAddPicture");
+  console.log(file);
+  console.log("The file name is: " + file.originalname);
+  console.log("The file type is: " + file.mimetype);
+  console.log(
+    "process.env.REACT_APP_IMGIX_API: " + process.env.REACT_APP_IMGIX_API
+  );
+
+  //Building out basic post functionality to test. does NOT start session.
+  var data = file;
+
+  var config = {
+    method: "post",
+    url:
+      `https://api.imgix.com/api/v1/sources/upload/62e31fcb03d7afea23063596/` +
+      file.originalname,
+    headers: {
+      Authorization: "Bearer TESTING",
+      "Content-Type": file.mimetype,
+    },
+    data: req.file.buffer,
+  };
+
+  axios(config)
+    .then(function (response) {
+      console.log("INSIDE THE .then() FOR /imgixAddPicture");
+      console.log(JSON.stringify(response.data));
+    })
+    .catch(function (error) {
+      console.log(error);
+    });
 });
 
 //get all pictures
@@ -69,3 +106,12 @@ const PORT = 5001;
 app.listen(PORT, () => {
   console.log("Server has started on port " + PORT);
 });
+
+//https://docs.imgix.com/apis/management#asset-upload-using-sessions
+
+//I don't think I'm grabbing the right binary?
+//https://stackoverflow.com/questions/57692942/multer-uploads-binary-file-with-different-name-and-no-extension-instead-of-origi
+
+//https://majeek.github.io/tutorials/react-redux-mongoose-boilerplate-basics/binary-data-upload-FormData-XMLHttpRequest-Multer/
+
+//https://www.youtube.com/watch?v=EVOFt8Its6I

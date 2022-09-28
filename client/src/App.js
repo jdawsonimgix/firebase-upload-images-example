@@ -5,6 +5,7 @@ import "./App.css";
 function App() {
   const [pic, setPic] = useState();
   const [allPics, setAllPics] = useState([]);
+  const [sessionData, setSessionData] = useState("no session data");
   useEffect(() => {
     getAllPics();
   }, [allPics]);
@@ -25,6 +26,7 @@ function App() {
       .catch((error) => console.log(error.message));
   };
 
+  //FIREBASE EXAMPLE OF HANDLE SUBMIT + HANDLE CHANGE.
   const handleSubmit = async (e) => {
     e.preventDefault();
     const formData = new FormData(); //https://developer.mozilla.org/en-US/docs/Web/API/FormData/FormData
@@ -39,26 +41,53 @@ function App() {
     setPic(e.target.files[0]);
   };
 
+  //IMGIX EXAMPLES OF STARTING UPLOAD SESSION
+  const imgixHandleSubmit = async (e) => {
+    e.preventDefault();
+    const formData = new FormData(); //https://developer.mozilla.org/en-US/docs/Web/API/FormData/FormData
+    console.log("Below is the formData inside imgixHandleSubmit");
+    formData.append("pic", pic);
+
+    const test = await axios
+      .post("http://localhost:5001/imgixAddPicture", formData)
+      .then(console.log("starting imgix session"))
+      .catch((error) => console.log(error.message));
+
+    setSessionData(test);
+    console.log("test is: ");
+    console.log(sessionData);
+  };
+  const imgixHandleChange = (e) => {
+    setPic(e.target.files[0]);
+  };
+
   return (
     <div className='app'>
-      <form className='form' onSubmit={handleSubmit}>
-        <input type='file' onChange={handleChange} />
-        <button>upload</button>
-      </form>
-      <div className='imgsContainer'>
-        {allPics &&
-          allPics.map((p) => (
-            <div className='imgItem' key={p.name}>
-              <img className='img' src={p.url} alt='' />
-              <button
-                className='imgButton'
-                onClick={() => handleDelete(p.name)}
-              >
-                Delete
-              </button>
-            </div>
-          ))}
+      <div>
+        <form className='form' onSubmit={handleSubmit}>
+          <input type='file' onChange={handleChange} />
+          <button>upload</button>
+        </form>
+
+        <div className='imgsContainer'>
+          {allPics &&
+            allPics.map((p) => (
+              <div className='imgItem' key={p.name}>
+                <img className='img' src={p.url} alt='' />
+                <button
+                  className='imgButton'
+                  onClick={() => handleDelete(p.name)}
+                >
+                  Delete
+                </button>
+              </div>
+            ))}
+        </div>
       </div>
+      <form className='form' onSubmit={imgixHandleSubmit}>
+        <input type='file' onChange={imgixHandleChange} />
+        <button>Start session</button>
+      </form>
     </div>
   );
 }
