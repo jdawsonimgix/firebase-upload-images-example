@@ -34,7 +34,7 @@ app.post("/addPicture", upload.single("pic"), async (req, res) => {
   const metatype = { contentType: file.mimetype, name: file.originalname };
   await uploadBytes(imageRef, file.buffer, metatype)
     .then((snapshot) => {
-      res.send("uploaded!");
+      res.send("uploaded!!!");
     })
     .catch((error) => console.log(error.message));
 });
@@ -58,8 +58,7 @@ app.post("/imgixAddPicture", upload.single("pic"), async (req, res) => {
       `https://api.imgix.com/api/v1/sources/upload/62e31fcb03d7afea23063596/` +
       file.originalname,
     headers: {
-      Authorization:
-        "Bearer ak_a5261930e96dd8375b900030d00e26e20da450c1d8aa0f93650c840f0e159af5",
+      Authorization: "Bearer ",
       "Content-Type": file.mimetype,
     },
     data: req.file.buffer,
@@ -104,14 +103,17 @@ app.post("/startImgixSession", upload.single("pic"), async (req, res) => {
     data: req.file.buffer,
   };
 
-  axios(config)
+  let final = await axios(config)
     .then(function (response) {
       console.log("INSIDE THE .then() FOR /startImgixSession");
       console.log(JSON.stringify(response.data));
+      return response.data;
     })
     .catch(function (error) {
       console.log(error);
+      return error;
     });
+  return res.status(200).send(final);
 });
 
 //get all pictures

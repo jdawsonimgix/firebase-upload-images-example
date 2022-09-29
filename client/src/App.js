@@ -6,6 +6,13 @@ function App() {
   const [pic, setPic] = useState();
   const [allPics, setAllPics] = useState([]);
   const [sessionData, setSessionData] = useState("no session data");
+  const [sessionSourceId, setSessionSourceId] = useState(
+    "no session source ID"
+  );
+  const [sessionStatus, setSessionStatus] = useState(
+    "No Status (pending/complete)"
+  );
+  const [sessionUrl, setSessionUrl] = useState("No session URL");
   useEffect(() => {
     getAllPics();
   }, [allPics, sessionData]);
@@ -55,8 +62,6 @@ function App() {
       .catch((error) => console.log(error.message));
 
     setSessionData(test);
-    console.log("test is: ");
-    console.log(sessionData);
   };
   const imgixHandleChange = (e) => {
     setPic(e.target.files[0]);
@@ -76,13 +81,19 @@ function App() {
       .post("http://localhost:5001/startImgixSession", formData)
       .then(console.log("starting imgix session"))
       .catch((error) => console.log(error.message));
-
+    //Start session
     setSessionData(test);
-    console.log("test is: ");
-    console.log(sessionData);
+    setSessionSourceId(test.data.data.attributes.id); //Stores session Source ID.
+    setSessionStatus(test.data.data.attributes.status);
+    setSessionUrl(test.data.data.attributes.url);
   };
   const imgixHandleChangeForSessionStarting = (e) => {
     setPic(e.target.files[0]);
+  };
+
+  const viewSessionData = (e) => {
+    console.log(sessionData);
+    console.log(sessionSourceId);
   };
 
   return (
@@ -116,6 +127,10 @@ function App() {
         <input type='file' onChange={imgixHandleChangeForSessionStarting} />
         <button>Starting a session</button>
       </form>
+      <button onClick={viewSessionData}>view session dataa</button>
+      <h3>The sessionSourceId is: {sessionSourceId}</h3>
+      <h3>The sessionStatus is: {sessionStatus}</h3>
+      <h3>The sessionUrl is: {sessionUrl}</h3>
     </div>
   );
 }
