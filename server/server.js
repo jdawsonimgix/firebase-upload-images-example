@@ -77,15 +77,7 @@ app.post("/imgixAddPicture", upload.single("pic"), async (req, res) => {
 //Start a session.
 app.post("/startImgixSession", upload.single("pic"), async (req, res) => {
   const file = req.file;
-  console.log("STARTING IMGIX SESSION");
-  console.log("Below is the file inside imgixAddPicture");
-  console.log(file);
-  console.log("The file name is: " + file.originalname);
-  console.log("The file type is: " + file.mimetype);
-  console.log(
-    "process.env.REACT_APP_IMGIX_API: " + process.env.REACT_APP_IMGIX_API
-  );
-
+  console.log("STARTING IMGIX SESSION IN SERVER");
   var data = file;
 
   //Example:
@@ -105,7 +97,36 @@ app.post("/startImgixSession", upload.single("pic"), async (req, res) => {
 
   let final = await axios(config)
     .then(function (response) {
-      console.log("INSIDE THE .then() FOR /startImgixSession");
+      // console.log("INSIDE THE .then() FOR /startImgixSession");
+      // console.log(JSON.stringify(response.data));
+      return response.data;
+    })
+    .catch(function (error) {
+      console.log(error);
+      return error;
+    });
+  return res.status(200).send(final);
+});
+
+//Checks status of an imgix session.
+app.post("/checkImgixSessionStatus", async (req, res) => {
+  console.log("Checking imgix status in /checkImgixSessionStatus");
+  const gssid = req.body.grabbedSessionSourceID;
+
+  var config = {
+    method: "get",
+    url:
+      `https://api.imgix.com/api/v1/sources/62e31fcb03d7afea23063596/upload-sessions/` +
+      gssid,
+    headers: {
+      Authorization: "Bearer ",
+      "Content-Type": "application/json",
+    },
+  };
+
+  let final = await axios(config)
+    .then(function (response) {
+      console.log("INSIDE THE .then() FOR /checkImgixSessionStatus");
       console.log(JSON.stringify(response.data));
       return response.data;
     })
@@ -115,6 +136,15 @@ app.post("/startImgixSession", upload.single("pic"), async (req, res) => {
     });
   return res.status(200).send(final);
 });
+
+/*
+Firebase code below
+//
+//
+//
+//
+//
+*/
 
 //get all pictures
 app.get("/pictures", async (req, res) => {

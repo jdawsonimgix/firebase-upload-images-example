@@ -5,14 +5,15 @@ import "./App.css";
 function App() {
   const [pic, setPic] = useState();
   const [allPics, setAllPics] = useState([]);
+  //const [storedFormData, setStoredFormData] = useState("");
   const [sessionData, setSessionData] = useState("no session data");
   const [sessionSourceId, setSessionSourceId] = useState(
     "no session source ID"
-  );
+  ); //Used to check status.
   const [sessionStatus, setSessionStatus] = useState(
     "No Status (pending/complete)"
   );
-  const [sessionUrl, setSessionUrl] = useState("No session URL");
+  const [sessionUrl, setSessionUrl] = useState("No session URL"); //Long amazon url
   useEffect(() => {
     getAllPics();
   }, [allPics, sessionData]);
@@ -75,6 +76,7 @@ function App() {
       "Below is the formData inside imgixHandleSubmitForSessionStarting"
     );
     formData.append("pic", pic);
+    //setStoredFormData(formData); //Storing formData to use in other functions.
 
     //Starting session
     const test = await axios
@@ -85,15 +87,32 @@ function App() {
     setSessionData(test);
     setSessionSourceId(test.data.data.attributes.id); //Stores session Source ID.
     setSessionStatus(test.data.data.attributes.status);
-    setSessionUrl(test.data.data.attributes.url);
+    setSessionUrl(test.data.data.attributes.url); //stores long Amazon URL
   };
   const imgixHandleChangeForSessionStarting = (e) => {
     setPic(e.target.files[0]);
   };
 
-  const viewSessionData = (e) => {
-    console.log(sessionData);
-    console.log(sessionSourceId);
+  //IMGIX EXAMPLE: CHECK SESSION STATUS
+  const imgixHandleCheckStatus = async (e) => {
+    e.preventDefault();
+    console.log(
+      "I'm in the client imgixHanldeCheckStatus and sessionSourceID is: " +
+        sessionSourceId
+    );
+    const value = { grabbedSessionSourceID: sessionSourceId };
+
+    //check session
+    const sessionStatusForAxios = await axios
+      .post("http://localhost:5001/checkImgixSessionStatus", value)
+      .then(console.log("Check imgix session"))
+      .catch((error) => console.log(error.message));
+
+    console.log("sessionStatusForAxios.data.data.attributes.status is: ");
+    console.log(sessionStatusForAxios.data.data.attributes.status);
+    setSessionStatus(
+      "Checked: " + sessionStatusForAxios.data.data.attributes.status
+    );
   };
 
   return (
@@ -127,7 +146,9 @@ function App() {
         <input type='file' onChange={imgixHandleChangeForSessionStarting} />
         <button>Starting a session</button>
       </form>
-      <button onClick={viewSessionData}>view session dataa</button>
+      <button onClick={imgixHandleCheckStatus}>Check session status</button>
+
+      {/* <button onClick={viewSessionData}>view session dataa</button> */}
       <h3>The sessionSourceId is: {sessionSourceId}</h3>
       <h3>The sessionStatus is: {sessionStatus}</h3>
       <h3>The sessionUrl is: {sessionUrl}</h3>
