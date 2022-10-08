@@ -24,56 +24,56 @@ const memoStorage = multer.memoryStorage();
 const upload = multer({ memoStorage });
 
 //add a picture
-app.post("/addPicture", upload.single("pic"), async (req, res) => {
-  const file = req.file;
-  console.log("Below is the file inside addPicture");
-  console.log(file);
-  console.log("The file name is: " + file.originalname);
-  console.log("The file type is: " + file.mimetype);
-  const imageRef = ref(storage, file.originalname);
-  const metatype = { contentType: file.mimetype, name: file.originalname };
-  await uploadBytes(imageRef, file.buffer, metatype)
-    .then((snapshot) => {
-      res.send("uploaded!!!");
-    })
-    .catch((error) => console.log(error.message));
-});
+// app.post("/addPicture", upload.single("pic"), async (req, res) => {
+//   const file = req.file;
+//   console.log("Below is the file inside addPicture");
+//   console.log(file);
+//   console.log("The file name is: " + file.originalname);
+//   console.log("The file type is: " + file.mimetype);
+//   const imageRef = ref(storage, file.originalname);
+//   const metatype = { contentType: file.mimetype, name: file.originalname };
+//   await uploadBytes(imageRef, file.buffer, metatype)
+//     .then((snapshot) => {
+//       res.send("uploaded!!!");
+//     })
+//     .catch((error) => console.log(error.message));
+// });
 
 //This function does a basic upload to an imgix source. it does NOT start a session.
-app.post("/imgixAddPicture", upload.single("pic"), async (req, res) => {
-  const file = req.file;
-  console.log("Below is the file inside imgixAddPicture");
-  console.log(file);
-  console.log("The file name is: " + file.originalname);
-  console.log("The file type is: " + file.mimetype);
-  console.log(
-    "process.env.REACT_APP_IMGIX_API: " + process.env.REACT_APP_IMGIX_API
-  );
+// app.post("/imgixAddPicture", upload.single("pic"), async (req, res) => {
+//   const file = req.file;
+//   console.log("Below is the file inside imgixAddPicture");
+//   console.log(file);
+//   console.log("The file name is: " + file.originalname);
+//   console.log("The file type is: " + file.mimetype);
+//   console.log(
+//     "process.env.REACT_APP_IMGIX_API: " + process.env.REACT_APP_IMGIX_API
+//   );
 
-  var data = file;
+//   var data = file;
 
-  var config = {
-    method: "post",
-    url:
-      `https://api.imgix.com/api/v1/sources/upload/62e31fcb03d7afea23063596/` +
-      file.originalname,
-    headers: {
-      Authorization:
-        "Bearer ak_a5261930e96dd8375b900030d00e26e20da450c1d8aa0f93650c840f0e159af5",
-      "Content-Type": file.mimetype,
-    },
-    data: req.file.buffer,
-  };
+//   var config = {
+//     method: "post",
+//     url:
+//       `https://api.imgix.com/api/v1/sources/upload/62e31fcb03d7afea23063596/` +
+//       file.originalname,
+//     headers: {
+//       Authorization:
+//         "Bearer ",
+//       "Content-Type": file.mimetype,
+//     },
+//     data: req.file.buffer,
+//   };
 
-  axios(config)
-    .then(function (response) {
-      console.log("INSIDE THE .then() FOR /imgixAddPicture");
-      console.log(JSON.stringify(response.data));
-    })
-    .catch(function (error) {
-      console.log(error);
-    });
-});
+//   axios(config)
+//     .then(function (response) {
+//       console.log("INSIDE THE .then() FOR /imgixAddPicture");
+//       console.log(JSON.stringify(response.data));
+//     })
+//     .catch(function (error) {
+//       console.log(error);
+//     });
+// });
 
 //Start a session.
 app.post("/startImgixSession", upload.single("pic"), async (req, res) => {
@@ -91,8 +91,7 @@ app.post("/startImgixSession", upload.single("pic"), async (req, res) => {
       `https://api.imgix.com/api/v1/sources/62e31fcb03d7afea23063596/upload-sessions/` +
       file.originalname,
     headers: {
-      Authorization:
-        "Bearer ak_a5261930e96dd8375b900030d00e26e20da450c1d8aa0f93650c840f0e159af5",
+      Authorization: "Bearer ",
       "Content-Type": file.mimetype,
     },
     data: req.file.buffer,
@@ -111,6 +110,33 @@ app.post("/startImgixSession", upload.single("pic"), async (req, res) => {
   return res.status(200).send(final);
 });
 
+app.post("/postSession", upload.single("pic"), async (req, res) => {
+  let testReq = req.body.theFormData.mimetype;
+  const fileForFormData = req.body.theSessionPresignedUrl; //long Amazon URL
+  console.log("***************fileForFormData************** ");
+  console.log(testReq);
+  // console.log(fileForFormData);
+
+  // var config = {
+  //   method: 'put',
+  //   url: fileForFormData,
+  //   headers: {
+  //     'Content-Type': 'image/jpeg'
+  //   },
+  //   data : PUT_BUFFER_DATA_HERE
+  // };
+
+  // axios(config)
+  // .then(function (response) {
+  //   console.log(JSON.stringify(response.data));
+  // })
+  // .catch(function (error) {
+  //   console.log(error);
+  // });
+
+  return res.status(200).send("post Session");
+});
+
 //Checks status of an imgix session.
 app.post("/checkImgixSessionStatus", async (req, res) => {
   console.log("Checking imgix status in /checkImgixSessionStatus");
@@ -122,8 +148,7 @@ app.post("/checkImgixSessionStatus", async (req, res) => {
       `https://api.imgix.com/api/v1/sources/62e31fcb03d7afea23063596/upload-sessions/` +
       gssid,
     headers: {
-      Authorization:
-        "Bearer ak_a5261930e96dd8375b900030d00e26e20da450c1d8aa0f93650c840f0e159af5",
+      Authorization: "Bearer ",
       "Content-Type": "application/json",
     },
   };
@@ -154,8 +179,7 @@ app.post("/checkImgixCloseSession", async (req, res) => {
       `https://api.imgix.com/api/v1/sources/62e31fcb03d7afea23063596/upload-sessions/` +
       gssid,
     headers: {
-      Authorization:
-        "Bearer ak_a5261930e96dd8375b900030d00e26e20da450c1d8aa0f93650c840f0e159af5",
+      Authorization: "Bearer ",
     },
   };
 

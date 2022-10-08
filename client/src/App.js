@@ -4,70 +4,67 @@ import "./App.css";
 
 function App() {
   const [pic, setPic] = useState();
-  const [allPics, setAllPics] = useState([]);
-  const [storedFormData, setStoredFormData] = useState("");
-  const [storedMimetype, setStoredMimtype] = useState("maybe jpeg??");
+  // const [allPics, setAllPics] = useState([]);
+  // const [storedMimetype, setStoredMimtype] = useState("maybe jpeg??");
   const [sessionData, setSessionData] = useState("no session data");
-  const [sessionSourceId, setSessionSourceId] = useState(
-    "no session source ID"
-  ); //Used to check status.
-  const [sessionStatus, setSessionStatus] = useState(
-    "No Status (pending/complete)"
-  );
-  const [sessionUrl, setSessionUrl] = useState("No session URL"); //Long amazon url
+  const [sessionSourceId, setSessionSourceId] = useState("no session"); //Used to check status.
+  const [sessionStatus, setSessionStatus] = useState("No Status");
+  const [sessionPresignedUrl, setSessionPresignedUrl] =
+    useState("No session URL"); //Long amazon url
+  const [heldFormData, setHeldFormData] = useState("");
   useEffect(() => {
-    getAllPics();
-  }, [allPics, sessionData]);
+    // getAllPics();
+  }, [sessionData, heldFormData]);
 
-  const getAllPics = async () => {
-    await axios
-      .get("http://localhost:5001/pictures")
-      .then((res) => setAllPics(res.data))
-      .catch((error) => console.log(error.message));
-  };
+  // const getAllPics = async () => {
+  //   await axios
+  //     .get("http://localhost:5001/pictures")
+  //     .then((res) => setAllPics(res.data))
+  //     .catch((error) => console.log(error.message));
+  // };
 
-  const handleDelete = async (name) => {
-    await axios
-      .delete("http://localhost:5001/delete", {
-        data: { name: name },
-      })
-      .then(getAllPics())
-      .catch((error) => console.log(error.message));
-  };
+  // const handleDelete = async (name) => {
+  //   await axios
+  //     .delete("http://localhost:5001/delete", {
+  //       data: { name: name },
+  //     })
+  //     .then(getAllPics())
+  //     .catch((error) => console.log(error.message));
+  // };
 
   //FIREBASE EXAMPLE OF HANDLE SUBMIT + HANDLE CHANGE.
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const formData = new FormData(); //https://developer.mozilla.org/en-US/docs/Web/API/FormData/FormData
-    console.log(formData);
-    formData.append("pic", pic);
-    await axios
-      .post("http://localhost:5001/addPicture", formData)
-      .then(getAllPics())
-      .catch((error) => console.log(error.message));
-  };
-  const handleChange = (e) => {
-    setPic(e.target.files[0]);
-  };
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   const formData = new FormData(); //https://developer.mozilla.org/en-US/docs/Web/API/FormData/FormData
+  //   console.log(formData);
+  //   formData.append("pic", pic);
+  //   await axios
+  //     .post("http://localhost:5001/addPicture", formData)
+  //     .then(getAllPics())
+  //     .catch((error) => console.log(error.message));
+  // };
+  // const handleChange = (e) => {
+  //   setPic(e.target.files[0]);
+  // };
 
   //IMGIX EXAMPLES OF BASIC UPLOAD. (NONE SESSION)
-  const imgixHandleSubmit = async (e) => {
-    e.preventDefault();
-    const formData = new FormData(); //https://developer.mozilla.org/en-US/docs/Web/API/FormData/FormData
-    console.log("Below is the formData inside imgixHandleSubmit");
-    formData.append("pic", pic);
+  // const imgixHandleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   const formData = new FormData(); //https://developer.mozilla.org/en-US/docs/Web/API/FormData/FormData
+  //   console.log("Below is the formData inside imgixHandleSubmit");
+  //   formData.append("pic", pic);
 
-    //BASIC UPLOAD NONE SESSION
-    const test = await axios
-      .post("http://localhost:5001/imgixAddPicture", formData)
-      .then(console.log("starting imgix session"))
-      .catch((error) => console.log(error.message));
+  //   //BASIC UPLOAD NONE SESSION
+  //   const test = await axios
+  //     .post("http://localhost:5001/imgixAddPicture", formData)
+  //     .then(console.log("starting imgix session"))
+  //     .catch((error) => console.log(error.message));
 
-    setSessionData(test);
-  };
-  const imgixHandleChange = (e) => {
-    setPic(e.target.files[0]);
-  };
+  //   setSessionData(test);
+  // };
+  // const imgixHandleChange = (e) => {
+  //   setPic(e.target.files[0]);
+  // };
 
   //IMGIX EXAMPLES: STARTING SESSION
   const imgixHandleSubmitForSessionStarting = async (e) => {
@@ -77,7 +74,8 @@ function App() {
       "Below is the formData inside imgixHandleSubmitForSessionStarting"
     );
     formData.append("pic", pic);
-    setStoredFormData(formData); //Storing formData to use in other functions.
+
+    setHeldFormData(formData);
 
     //Starting session
     const test = await axios
@@ -85,11 +83,12 @@ function App() {
       .then(console.log("starting imgix session"))
       .catch((error) => console.log(error.message));
     //Start session
+    console.log("Formdata below from start:");
+    console.log(heldFormData);
     setSessionData(test);
     setSessionSourceId(test.data.data.attributes.id); //Stores session Source ID.
     setSessionStatus(test.data.data.attributes.status);
-    setSessionUrl(test.data.data.attributes.url); //stores long Amazon URL
-    setStoredMimtype(test.data.data.attributes.mimetype); //stores image/jpeg
+    setSessionPresignedUrl(test.data.data.attributes.url); //stores long Amazon URL
   };
   const imgixHandleChangeForSessionStarting = (e) => {
     setPic(e.target.files[0]);
@@ -140,15 +139,44 @@ function App() {
     );
   };
 
+  //See formData
+  const seeFormData = () => {
+    console.log(heldFormData);
+  };
+
+  //IMGIX EXAMPLE: PUT REQUEST WITH PRESIGNED SESSION URL
+  //I NEED IMAGE BINARY!!!
+
+  //Sending an object worked!!! Now I need to parse the info in the server.js file
+  const sendFormDataPostRequest = async (e) => {
+    e.preventDefault();
+    console.log("inside client sendFormDataPost Request");
+    console.log("Below is the formData inside sendFormDataPostRequest");
+    console.log(heldFormData);
+
+    var neededData = {
+      theFormData: heldFormData,
+      theSessionPresignedUrl: sessionPresignedUrl,
+    };
+
+    //Starting session
+    const test = await axios
+      .post("http://localhost:5001/postSession", neededData)
+      .then(console.log(""))
+      .catch((error) => console.log(error.message));
+
+    console.log(test);
+  };
+
   return (
     <div className='app'>
       <div>
-        <form className='form' onSubmit={handleSubmit}>
+        {/* <form className='form' onSubmit={handleSubmit}>
           <input type='file' onChange={handleChange} />
           <button>upload to Firebase</button>
-        </form>
+        </form> */}
 
-        <div className='imgsContainer'>
+        {/* <div className='imgsContainer'>
           {allPics &&
             allPics.map((p) => (
               <div className='imgItem' key={p.name}>
@@ -161,12 +189,12 @@ function App() {
                 </button>
               </div>
             ))}
-        </div>
+        </div> */}
       </div>
-      <form className='form' onSubmit={imgixHandleSubmit}>
+      {/* <form className='form' onSubmit={imgixHandleSubmit}>
         <input type='file' onChange={imgixHandleChange} />
         <button>Basic image upload, not a session</button>
-      </form>
+      </form> */}
       <form className='form' onSubmit={imgixHandleSubmitForSessionStarting}>
         <input type='file' onChange={imgixHandleChangeForSessionStarting} />
         <button>Starting a session</button>
@@ -174,13 +202,29 @@ function App() {
       <button onClick={imgixHandleCheckStatus}>Check session status</button>
       <br />
       <button onClick={imgixHandleCloseSession}>Close Session</button>
+      <br />
       {/* <button onClick={viewSessionData}>view session dataa</button> */}
+      <button onClick={seeFormData}>See form data in Console log</button>
+      <br />
+      <button onClick={sendFormDataPostRequest}>
+        Sending formData to Post Request
+      </button>
       <h3>The sessionSourceId is: {sessionSourceId}</h3>
       <h3>The sessionStatus is: {sessionStatus}</h3>
-      <h3>The sessionUrl is: {sessionUrl}</h3>
-      <h3>minetype is: {storedMimetype}</h3>
+      <h3>The sessionPresignedUrl is: {sessionPresignedUrl}</h3>
+      {/* <h3>minetype is: {storedMimetype}</h3> */}
     </div>
   );
 }
 
 export default App;
+
+/*
+Steps to follow:
+1) Start session
+2) upload with Presigned URL
+3) Close session
+4) Check status.
+
+
+*/
