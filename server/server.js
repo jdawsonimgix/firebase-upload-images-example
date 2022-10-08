@@ -10,7 +10,7 @@ require("dotenv").config();
 
 const app = express();
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: "500mb" }));
 app.use(bodyParser.json({ limit: "500mb" }));
 app.use(
   bodyParser.urlencoded({
@@ -80,7 +80,7 @@ app.post("/startImgixSession", upload.single("pic"), async (req, res) => {
   const file = req.file;
   console.log("STARTING IMGIX SESSION IN SERVER");
   var data = file;
-  console.log(file);
+  //console.log(file);
 
   //Example:
   //https://api.imgix.com/api/v1/sources/62e31fcb03d7afea23063596/upload-sessions/a_pup.jpeg
@@ -99,40 +99,45 @@ app.post("/startImgixSession", upload.single("pic"), async (req, res) => {
 
   let final = await axios(config)
     .then(function (response) {
-      console.log("INSIDE THE .then() FOR /startImgixSession");
-      console.log(JSON.stringify(response.data));
+      console.log("successfully did /startImgixSession axios call");
+      //console.log(JSON.stringify(response.data));
       return response.data;
     })
     .catch(function (error) {
       console.log(error);
       return error;
     });
-  return res.status(200).send(final);
+
+  let trueFinal = {
+    allData: final,
+    theBufferReturned: req.file.buffer,
+  };
+  return res.status(200).send(trueFinal);
 });
 
 app.post("/postSession", upload.single("pic"), async (req, res) => {
-  let testReq = req.body.theFormData.mimetype;
+  let bufferForFormData = req.body.theFormData;
   const fileForFormData = req.body.theSessionPresignedUrl; //long Amazon URL
   console.log("***************fileForFormData************** ");
-  console.log(testReq);
+  //console.log(bufferForFormData);
   // console.log(fileForFormData);
 
-  // var config = {
-  //   method: 'put',
-  //   url: fileForFormData,
-  //   headers: {
-  //     'Content-Type': 'image/jpeg'
-  //   },
-  //   data : PUT_BUFFER_DATA_HERE
-  // };
+  var config = {
+    method: "put",
+    url: fileForFormData,
+    headers: {
+      "Content-Type": "image/jpeg",
+    },
+    data: bufferForFormData,
+  };
 
-  // axios(config)
-  // .then(function (response) {
-  //   console.log(JSON.stringify(response.data));
-  // })
-  // .catch(function (error) {
-  //   console.log(error);
-  // });
+  axios(config)
+    .then(function (response) {
+      console.log(JSON.stringify(response.data));
+    })
+    .catch(function (error) {
+      console.log(error);
+    });
 
   return res.status(200).send("post Session");
 });

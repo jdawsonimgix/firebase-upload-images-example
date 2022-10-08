@@ -67,6 +67,8 @@ function App() {
   // };
 
   //IMGIX EXAMPLES: STARTING SESSION
+
+  //I'm now fixing the data being passed around. Check the server for an object that is returnig and fix the react hooks.
   const imgixHandleSubmitForSessionStarting = async (e) => {
     e.preventDefault();
     const formData = new FormData();
@@ -75,20 +77,18 @@ function App() {
     );
     formData.append("pic", pic);
 
-    setHeldFormData(formData);
-
-    //Starting session
     const test = await axios
       .post("http://localhost:5001/startImgixSession", formData)
       .then(console.log("starting imgix session"))
       .catch((error) => console.log(error.message));
-    //Start session
-    console.log("Formdata below from start:");
-    console.log(heldFormData);
-    setSessionData(test);
-    setSessionSourceId(test.data.data.attributes.id); //Stores session Source ID.
-    setSessionStatus(test.data.data.attributes.status);
-    setSessionPresignedUrl(test.data.data.attributes.url); //stores long Amazon URL
+
+    console.log("Formdata below from the start:");
+    console.log("test from imgixHandleSubmitForSessionStarting");
+    console.log(test);
+    setSessionSourceId(test.data.allData.data.attributes.id); //Stores session Source id
+    setSessionStatus(test.data.allData.data.attributes.status);
+    setSessionPresignedUrl(test.data.allData.data.attributes.url);
+    setHeldFormData(test.data.theBufferReturned.data);
   };
   const imgixHandleChangeForSessionStarting = (e) => {
     setPic(e.target.files[0]);
@@ -141,7 +141,7 @@ function App() {
 
   //See formData
   const seeFormData = () => {
-    console.log(heldFormData);
+    console.log(JSON.stringify(heldFormData));
   };
 
   //IMGIX EXAMPLE: PUT REQUEST WITH PRESIGNED SESSION URL
