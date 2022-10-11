@@ -64,19 +64,24 @@ app.post("/startImgixSession", upload.single("pic"), async (req, res) => {
 });
 
 app.post("/postSession", upload.single("pic"), async (req, res) => {
-  let bufferForFormData = req.body.theFormData; //bufferData
-  let fileForFormData = req.body.theSessionPresignedUrl; //long Amazon URL
-  console.log("***************fileForFormData************** ");
-  console.log(bufferForFormData);
-  console.log(fileForFormData);
+  // let bufferForFormData = req.body.theFormData; //bufferData
+  // let fileForFormData = req.body.theSessionPresignedUrl; //long Amazon URL
+  // console.log("***************fileForFormData************** ");
+  // console.log(bufferForFormData);
+  // console.log(fileForFormData);
+
+  let fileBufferData = req.file.buffer;
+  // console.log(file);
+  let theAWSurl = req.body.awsURL;
+  // console.log(bodyStuff);
 
   var config = {
     method: "put",
-    url: fileForFormData,
+    url: theAWSurl,
     headers: {
       "Content-Type": "image/jpeg",
     },
-    data: bufferForFormData,
+    data: fileBufferData,
   };
 
   let finalPost = await axios(config)
