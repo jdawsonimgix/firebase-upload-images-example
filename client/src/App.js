@@ -4,27 +4,18 @@ import "./App.css";
 
 function App() {
   const [pic, setPic] = useState();
-  // const [allPics, setAllPics] = useState([]);
-  // const [storedMimetype, setStoredMimtype] = useState("maybe jpeg??");
   const [sessionData, setSessionData] = useState("no session data");
   const [sessionSourceId, setSessionSourceId] = useState("no session"); //Used to check status.
   const [sessionStatus, setSessionStatus] = useState("No Status");
   const [sessionPresignedUrl, setSessionPresignedUrl] =
     useState("No session URL"); //Long amazon url
   const [heldFormData, setHeldFormData] = useState("");
-  useEffect(() => {
-    // getAllPics();
-  }, [sessionData, heldFormData]);
+  useEffect(() => {}, [sessionData, heldFormData]);
 
   //IMGIX EXAMPLES: STARTING SESSION
-
-  //I'm now fixing the data being passed around. Check the server for an object that is returnig and fix the react hooks.
   const imgixHandleSubmitForSessionStarting = async (e) => {
     e.preventDefault();
     const formData = new FormData();
-    console.log(
-      "Below is the formData inside imgixHandleSubmitForSessionStarting"
-    );
     formData.append("pic", pic);
 
     const test = await axios
@@ -32,9 +23,6 @@ function App() {
       .then(console.log("starting imgix session"))
       .catch((error) => console.log(error.message));
 
-    console.log("Formdata below from the start:");
-    console.log("test from imgixHandleSubmitForSessionStarting");
-    // console.log(test);
     setSessionSourceId(test.data.allData.data.attributes.id); //Stores session Source id
     setSessionStatus(test.data.allData.data.attributes.status);
     setSessionPresignedUrl(test.data.allData.data.attributes.url);
@@ -45,39 +33,22 @@ function App() {
   };
 
   //IMGIX EXAMPLE: PUT REQUEST WITH PRESIGNED SESSION URL
-  //I NEED IMAGE BINARY!!!
-  //Sending an object worked!!! Now I need to parse the info in the server.js file
   const sendFormDataPostRequest = async (e) => {
     e.preventDefault();
-    console.log("inside client sendFormDataPost Request");
-    console.log("Below is the formData inside sendFormDataPostRequest");
-    console.log(heldFormData);
     const formDataPostRequest = new FormData();
-    console.log("Below is the formData inside sendFormDataPostRequest");
     formDataPostRequest.append("pic", pic);
     formDataPostRequest.append("awsURL", sessionPresignedUrl);
-
-    var neededData = {
-      theFormData: formDataPostRequest,
-      theSessionPresignedUrl: sessionPresignedUrl,
-    };
 
     //Starting session
     const test = await axios
       .post("http://localhost:5001/postSession", formDataPostRequest)
       .then(console.log(""))
       .catch((error) => console.log(error.message));
-
-    console.log(test);
   };
 
   //IMGIX EXAMPLE: CHECK SESSION STATUS
   const imgixHandleCheckStatus = async (e) => {
     e.preventDefault();
-    console.log(
-      "I'm in the client imgixHanldeCheckStatus and sessionSourceID is: " +
-        sessionSourceId
-    );
     const value = { grabbedSessionSourceID: sessionSourceId };
 
     //check session
@@ -86,8 +57,6 @@ function App() {
       .then(console.log("Check imgix session"))
       .catch((error) => console.log(error.message));
 
-    console.log("sessionStatusForAxios.data.data.attributes.status is: ");
-    console.log(sessionStatusForAxios.data.data.attributes.status);
     setSessionStatus(
       "Checked: " + sessionStatusForAxios.data.data.attributes.status
     );
@@ -96,11 +65,6 @@ function App() {
   //IMGIX EXAMPLE: CLOSE SESSION
   const imgixHandleCloseSession = async (e) => {
     e.preventDefault();
-
-    console.log(
-      "I'm in the client imgixHanldeCheckStatus and sessionSourceID is: " +
-        sessionSourceId
-    );
     const valueData = { grabbedSessionSourceID: sessionSourceId };
 
     //close session
@@ -109,8 +73,6 @@ function App() {
       .then(console.log("Client - CLOSE imgix session"))
       .catch((error) => console.log(error.message));
 
-    console.log("sessionStatusForAxios.data.data.attributes.status is: ");
-    console.log(sessionStatusForAxios.data.data.attributes.status);
     setSessionStatus(
       "Checked: " + sessionStatusForAxios.data.data.attributes.status
     );
@@ -125,7 +87,9 @@ function App() {
     <div className='app'>
       <form className='form' onSubmit={imgixHandleSubmitForSessionStarting}>
         <input type='file' onChange={imgixHandleChangeForSessionStarting} />
+        <br />
         <button>Starting a session</button>
+        <br />
         <button onClick={sendFormDataPostRequest}>
           Sending formData to Post Request
         </button>
@@ -134,12 +98,9 @@ function App() {
       <br />
       <button onClick={imgixHandleCloseSession}>Close Session</button>
       <br />
-      {/* <button onClick={viewSessionData}>view session dataa</button> */}
       <button onClick={seeFormData}>See form data in Console log</button>
       <br />
-      {/* <button onClick={sendFormDataPostRequest}>
-        Sending formData to Post Request
-      </button> */}
+
       <h3>The sessionSourceId is: {sessionSourceId}</h3>
       <h3>The sessionStatus is: {sessionStatus}</h3>
       <h3>The sessionPresignedUrl is: {sessionPresignedUrl}</h3>

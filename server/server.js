@@ -26,12 +26,7 @@ const upload = multer({ memoStorage });
 //Start a session.
 app.post("/startImgixSession", upload.single("pic"), async (req, res) => {
   const file = req.file;
-  console.log("STARTING IMGIX SESSION IN SERVER");
-  var data = file;
-  //console.log(file);
-
-  //Example:
-  //https://api.imgix.com/api/v1/sources/62e31fcb03d7afea23063596/upload-sessions/a_pup.jpeg
+  console.log("Starting imgix session in server.js");
 
   var config = {
     method: "post",
@@ -39,7 +34,8 @@ app.post("/startImgixSession", upload.single("pic"), async (req, res) => {
       `https://api.imgix.com/api/v1/sources/62e31fcb03d7afea23063596/upload-sessions/` +
       file.originalname,
     headers: {
-      Authorization: "Bearer ",
+      Authorization:
+        "Bearer ak_a5261930e96dd8375b900030d00e26e20da450c1d8aa0f93650c840f0e159af5",
       "Content-Type": file.mimetype,
     },
     data: req.file.buffer,
@@ -48,7 +44,6 @@ app.post("/startImgixSession", upload.single("pic"), async (req, res) => {
   let final = await axios(config)
     .then(function (response) {
       console.log("successfully did /startImgixSession axios call");
-      //console.log(JSON.stringify(response.data));
       return response.data;
     })
     .catch(function (error) {
@@ -64,22 +59,14 @@ app.post("/startImgixSession", upload.single("pic"), async (req, res) => {
 });
 
 app.post("/postSession", upload.single("pic"), async (req, res) => {
-  // let bufferForFormData = req.body.theFormData; //bufferData
-  // let fileForFormData = req.body.theSessionPresignedUrl; //long Amazon URL
-  // console.log("***************fileForFormData************** ");
-  // console.log(bufferForFormData);
-  // console.log(fileForFormData);
-
   let fileBufferData = req.file.buffer;
-  // console.log(file);
   let theAWSurl = req.body.awsURL;
-  // console.log(bodyStuff);
 
   var config = {
     method: "put",
     url: theAWSurl,
     headers: {
-      "Content-Type": "image/jpeg",
+      "Content-Type": "video/mp4",
     },
     data: fileBufferData,
   };
@@ -107,7 +94,8 @@ app.post("/checkImgixSessionStatus", async (req, res) => {
       `https://api.imgix.com/api/v1/sources/62e31fcb03d7afea23063596/upload-sessions/` +
       gssid,
     headers: {
-      Authorization: "Bearer ",
+      Authorization:
+        "Bearer ak_a5261930e96dd8375b900030d00e26e20da450c1d8aa0f93650c840f0e159af5",
       "Content-Type": "application/json",
     },
   };
@@ -129,8 +117,6 @@ app.post("/checkImgixSessionStatus", async (req, res) => {
 app.post("/checkImgixCloseSession", async (req, res) => {
   console.log("Checking imgix status in /checkImgixCloseSession");
   const gssid = req.body.grabbedSessionSourceID;
-  console.log("The source ID inside the server /checkImgixCloseSession is:");
-  console.log(gssid);
 
   var config = {
     method: "post",
@@ -138,7 +124,8 @@ app.post("/checkImgixCloseSession", async (req, res) => {
       `https://api.imgix.com/api/v1/sources/62e31fcb03d7afea23063596/upload-sessions/` +
       gssid,
     headers: {
-      Authorization: "Bearer ",
+      Authorization:
+        "Bearer ak_a5261930e96dd8375b900030d00e26e20da450c1d8aa0f93650c840f0e159af5",
     },
   };
 
@@ -197,12 +184,3 @@ const PORT = 5001;
 app.listen(PORT, () => {
   console.log("Server has started on port " + PORT);
 });
-
-//https://docs.imgix.com/apis/management#asset-upload-using-sessions
-
-//I don't think I'm grabbing the right binary?
-//https://stackoverflow.com/questions/57692942/multer-uploads-binary-file-with-different-name-and-no-extension-instead-of-origi
-
-//https://majeek.github.io/tutorials/react-redux-mongoose-boilerplate-basics/binary-data-upload-FormData-XMLHttpRequest-Multer/
-
-//https://www.youtube.com/watch?v=EVOFt8Its6I
