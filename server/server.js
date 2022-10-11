@@ -23,58 +23,6 @@ app.use(
 const memoStorage = multer.memoryStorage();
 const upload = multer({ memoStorage });
 
-//add a picture
-// app.post("/addPicture", upload.single("pic"), async (req, res) => {
-//   const file = req.file;
-//   console.log("Below is the file inside addPicture");
-//   console.log(file);
-//   console.log("The file name is: " + file.originalname);
-//   console.log("The file type is: " + file.mimetype);
-//   const imageRef = ref(storage, file.originalname);
-//   const metatype = { contentType: file.mimetype, name: file.originalname };
-//   await uploadBytes(imageRef, file.buffer, metatype)
-//     .then((snapshot) => {
-//       res.send("uploaded!!!");
-//     })
-//     .catch((error) => console.log(error.message));
-// });
-
-//This function does a basic upload to an imgix source. it does NOT start a session.
-// app.post("/imgixAddPicture", upload.single("pic"), async (req, res) => {
-//   const file = req.file;
-//   console.log("Below is the file inside imgixAddPicture");
-//   console.log(file);
-//   console.log("The file name is: " + file.originalname);
-//   console.log("The file type is: " + file.mimetype);
-//   console.log(
-//     "process.env.REACT_APP_IMGIX_API: " + process.env.REACT_APP_IMGIX_API
-//   );
-
-//   var data = file;
-
-//   var config = {
-//     method: "post",
-//     url:
-//       `https://api.imgix.com/api/v1/sources/upload/62e31fcb03d7afea23063596/` +
-//       file.originalname,
-//     headers: {
-//       Authorization:
-//         "Bearer ",
-//       "Content-Type": file.mimetype,
-//     },
-//     data: req.file.buffer,
-//   };
-
-//   axios(config)
-//     .then(function (response) {
-//       console.log("INSIDE THE .then() FOR /imgixAddPicture");
-//       console.log(JSON.stringify(response.data));
-//     })
-//     .catch(function (error) {
-//       console.log(error);
-//     });
-// });
-
 //Start a session.
 app.post("/startImgixSession", upload.single("pic"), async (req, res) => {
   const file = req.file;
@@ -116,11 +64,11 @@ app.post("/startImgixSession", upload.single("pic"), async (req, res) => {
 });
 
 app.post("/postSession", upload.single("pic"), async (req, res) => {
-  let bufferForFormData = req.body.theFormData;
-  const fileForFormData = req.body.theSessionPresignedUrl; //long Amazon URL
+  let bufferForFormData = req.body.theFormData; //bufferData
+  let fileForFormData = req.body.theSessionPresignedUrl; //long Amazon URL
   console.log("***************fileForFormData************** ");
-  //console.log(bufferForFormData);
-  // console.log(fileForFormData);
+  console.log(bufferForFormData);
+  console.log(fileForFormData);
 
   var config = {
     method: "put",
@@ -131,15 +79,16 @@ app.post("/postSession", upload.single("pic"), async (req, res) => {
     data: bufferForFormData,
   };
 
-  axios(config)
+  let finalPost = await axios(config)
     .then(function (response) {
+      console.log("inside the axios for /postSession");
       console.log(JSON.stringify(response.data));
     })
     .catch(function (error) {
       console.log(error);
     });
 
-  return res.status(200).send("post Session");
+  return res.status(200).send(finalPost);
 });
 
 //Checks status of an imgix session.
@@ -210,7 +159,7 @@ Firebase code below
 //
 */
 
-//get all pictures
+//get all pictures for Firebase
 app.get("/pictures", async (req, res) => {
   const listRef = ref(storage);
   let productPictures = [];
@@ -228,7 +177,7 @@ app.get("/pictures", async (req, res) => {
     .catch((error) => console.log(error.message));
 });
 
-// delete a picture
+// delete a picture for Firebase
 app.delete("/delete", async (req, res) => {
   const deletePic = req.body.name;
   const deleteRef = ref(storage, deletePic);
